@@ -1,42 +1,46 @@
 # Multer [![Build Status](https://travis-ci.org/expressjs/multer.svg?branch=master)](https://travis-ci.org/expressjs/multer) [![NPM version](https://badge.fury.io/js/multer.svg)](https://badge.fury.io/js/multer) [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://github.com/feross/standard)
 
-Multer is a node.js middleware for handling `multipart/form-data`, which is primarily used for uploading files. It is written
-on top of [busboy](https://github.com/mscdex/busboy) for maximum efficiency.
+Multer, "multipart/form-data" işlemek için bir node.js ara yazılımıdır, genel ve öncelikle dosya yüklemek için kullanılır. 
+Maksimum verimlilik için [busboy](https://github.com/mscdex/busboy) üzerine yazılmıştır.
 
-**NOTE**: Multer will not process any form which is not multipart (`multipart/form-data`).
+**NOT**: Multer çok parçalı(Multipart) olmayan hiçbir formu işlemez (`multipart/form-data`).
 
-## Translations
+## Çevirilier
 
-This README is also available in other languages:
+Bu README ayrıcı şu dillerde de mevcuttur:
 
 - [العربية](https://github.com/expressjs/multer/blob/master/doc/README-ar.md) (Arabic)
-- [Español](https://github.com/expressjs/multer/blob/master/doc/README-es.md) (Spanish)
-- [简体中文](https://github.com/expressjs/multer/blob/master/doc/README-zh-cn.md) (Chinese)
-- [한국어](https://github.com/expressjs/multer/blob/master/doc/README-ko.md) (Korean)
-- [Русский язык](https://github.com/expressjs/multer/blob/master/doc/README-ru.md) (Russian)
-- [Việt Nam](https://github.com/expressjs/multer/blob/master/doc/README-vi.md) (Vietnam)
-- [Português](https://github.com/expressjs/multer/blob/master/doc/README-pt-br.md) (Portuguese Brazil)
-- [Français](https://github.com/expressjs/multer/blob/master/doc/README-fr.md) (French)
+- [Español](https://github.com/expressjs/multer/blob/master/doc/README-es.md) (İspanyolca)
+- [简体中文](https://github.com/expressjs/multer/blob/master/doc/README-zh-cn.md) (Çince)
+- [한국어](https://github.com/expressjs/multer/blob/master/doc/README-ko.md) (Korece)
+- [Русский язык](https://github.com/expressjs/multer/blob/master/doc/README-ru.md) (Rusça)
+- [Việt Nam](https://github.com/expressjs/multer/blob/master/doc/README-vi.md) (Vietnamca)
+- [Português](https://github.com/expressjs/multer/blob/master/doc/README-pt-br.md) (Brezilya Portekizcesi)
+- [Français](https://github.com/expressjs/multer/blob/master/doc/README-fr.md) (Fransızca)
 
-## Installation
+## Kurulum
 
 ```sh
 $ npm install --save multer
 ```
 
-## Usage
+## Kullanım
 
-Multer adds a `body` object and a `file` or `files` object to the `request` object. The `body` object contains the values of the text fields of the form, the `file` or `files` object contains the files uploaded via the form.
+Multer, istek (`request`) nesnesine bir `body` nesnesi ve bir `file` veya `files`nesnesi ekler. `body` nesnesi, formun metin alanlarının değerlerini içerirken, `file` veya `files` nesnesi, form aracılığıyla yüklenen dosyaları içerir.
 
-Basic usage example:
 
-Don't forget the `enctype="multipart/form-data"` in your form.
+Formunuzda `enctype="multipart/form-data"` belirtmeyi unutmayın.
+
+Temel kullanım örneği:
+
 
 ```html
 <form action="/profile" method="post" enctype="multipart/form-data">
   <input type="file" name="avatar" />
 </form>
 ```
+
+
 
 ```javascript
 const express = require('express')
@@ -46,13 +50,13 @@ const upload = multer({ dest: 'uploads/' })
 const app = express()
 
 app.post('/profile', upload.single('avatar'), function (req, res, next) {
-  // req.file is the `avatar` file
-  // req.body will hold the text fields, if there were any
+  // req.file 'avatar' dosyasıdır.
+  // req.body eğer varsa metin alanlarını tutar
 })
 
 app.post('/photos/upload', upload.array('photos', 12), function (req, res, next) {
-  // req.files is array of `photos` files
-  // req.body will contain the text fields, if there were any
+  // req.files  `photos` dizisini tutar
+  // req.body eğer varsa metin alanlarını tutacaktır
 })
 
 const cpUpload = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'gallery', maxCount: 8 }])
@@ -280,56 +284,53 @@ Specifying the limits can help protect your site against denial of service (DoS)
 
 ### `fileFilter`
 
-Set this to a function to control which files should be uploaded and which
-should be skipped. The function should look like this:
+Hangi dosyaların yükleneceğini ve hangilerinin atlanacağını kontrol etmek için bunu bir fonksiyona ayarlayın. Fonksiyon şöyle görünmelidir:
 
 ```javascript
+
 function fileFilter (req, file, cb) {
+// Fonksiyon, dosyanın kabul edilip edilmeyeceğini belirtmek için `cb` fonksiyonunu çağırmalıdır
 
-  // The function should call `cb` with a boolean
-  // to indicate if the file should be accepted
+// Bu dosyayı reddetmek için false geçirin:
+cb(null, false);
 
-  // To reject this file pass `false`, like so:
-  cb(null, false)
+// Dosyayı kabul etmek için true geçirin:
+cb(null, true);
 
-  // To accept the file pass `true`, like so:
-  cb(null, true)
-
-  // You can always pass an error if something goes wrong:
-  cb(new Error('I don\'t have a clue!'))
+// Herhangi bir şey yanlış giderse her zaman bir hata geçirebilirsiniz:
+cb(new Error('Ne olduğunu bilmiyorum!'));
 
 }
 ```
 
-## Error handling
+## Hata yakalama
 
-When encountering an error, Multer will delegate the error to Express. You can
-display a nice error page using [the standard express way](http://expressjs.com/guide/error-handling.html).
 
-If you want to catch errors specifically from Multer, you can call the
-middleware function by yourself. Also, if you want to catch only [the Multer errors](https://github.com/expressjs/multer/blob/master/lib/multer-error.js), you can use the `MulterError` class that is attached to the `multer` object itself (e.g. `err instanceof multer.MulterError`).
+Hata ile karşılaşıldığında, Multer hatayı Express'e devreder.[Standart Express yöntemi](http://expressjs.com/guide/error-handling.html) kullanarak güzel bir hata sayfası görüntüleyebilirsiniz.
+
+Eğer özellikle Multer'dan kaynaklanan hataları yakalamak istiyorsanız, ara yazılım (middleware) fonksiyonunu kendiniz çağırabilirsiniz. Ayrıca, sadece [Multer hatalarını](https://github.com/expressjs/multer/blob/master/lib/multer-error.js) yakalamak istiyorsanız, `multer` nesnesine eklenen `MulterError` sınıfını kullanabilirsiniz (ör. `err instanceof multer.MulterError`).
 
 ```javascript
-const multer = require('multer')
-const upload = multer().single('avatar')
+const multer = require('multer');
+const upload = multer().single('avatar');
 
 app.post('/profile', function (req, res) {
   upload(req, res, function (err) {
     if (err instanceof multer.MulterError) {
-      // A Multer error occurred when uploading.
+      // Dosya yükleme sırasında bir Multer hatası oluştu.
     } else if (err) {
-      // An unknown error occurred when uploading.
+      // Dosya yükleme sırasında bilinmeyen bir hata oluştu.
     }
 
-    // Everything went fine.
-  })
-})
+    // Her şey yolunda gitti.
+  });
+});
 ```
 
-## Custom storage engine
+## Özel Depolama Motoru
 
-For information on how to build your own storage engine, see [Multer Storage Engine](https://github.com/expressjs/multer/blob/master/StorageEngine.md).
+Kendi depolama motorunuzu nasıl oluşturacağınız hakkında bilgi için bkz. Cafer [Multer Storage Engine](https://github.com/expressjs/multer/blob/master/StorageEngine.md).
 
-## License
+## Lisans
 
 [MIT](LICENSE)
